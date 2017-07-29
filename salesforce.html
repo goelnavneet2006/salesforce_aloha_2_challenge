@@ -1,0 +1,206 @@
+<script type="text/javascript" charset="utf-8">
+  
+  var input = 
+`55
+A       .-
+B       -...
+C       -.-.
+D       -..
+E       .
+F       ..-.
+G       --.
+H       ....
+I       ..
+J       .---
+K       -.-
+L       .-..
+M       --
+N       -.
+O       ---
+P       .--.
+Q       --.-
+R       .-.
+S       ...
+T       -
+U       ..-
+V       ...-
+W       .--
+X       -..-
+Y       -.--
+Z       --..
+0       ------
+1       .-----
+2       ..---
+3       ...--
+4       ....-
+5       .....
+6       -....
+7       --...
+8       ---..
+9       ----.
+*
+AN
+EARTHQUAKE
+EAT
+GOD
+HATH
+IM
+READY
+TO
+WHAT
+WROTH
+*
+.--.....--   .....--....
+--.----..   .--.-.----..
+.--.....--   .--.
+..-.-.-....--.-..-.--.-.
+..--   .-...--..-.--
+----        ..--
+*`;
+
+function processData(input) {
+    var inputList = input.match(/.+(?=\r|\n|\r\n)/g);
+    var linesCount = inputList[0];
+
+    var i = 1;
+    var morseCodeMap = {};
+    while (!inputList[i].includes("*") && i <= linesCount) {
+      var morseCodes = inputList[i].split(/\s+/);
+      morseCodeMap[morseCodes[0]] = morseCodes[1];
+      i++;
+    }
+    i++;
+
+    var contextList = [];
+    while (!inputList[i].includes("*") && i <= linesCount) {
+      var contexts = inputList[i].split(/\s+/);
+      contextList.push(contexts[0]);
+      i++;
+    }
+    i++;
+
+    var morseWords = [];
+    while (inputList[i] && !inputList[i].includes("*") && i <= linesCount) {
+      var morses = inputList[i].split(/\s+/);
+      for (var j = 0; j < morses.length; j++) {
+        morseWords.push(morses[j]);
+      }
+      i++;
+    }
+
+    var contextListMorseCodesReverse = {};
+    for (var i = 0; i < contextList.length; i++) {
+      var contextWordMorseCode = "";
+      var contextWordChars = contextList[i].split("");
+      for (var j = 0; j < contextWordChars.length; j++) {
+        contextWordMorseCode += morseCodeMap[contextWordChars[j]];
+      }
+
+      if (contextWordMorseCode in contextListMorseCodesReverse) {
+        contextListMorseCodesReverse[contextWordMorseCode].push(contextList[i]);
+      } else {
+        contextListMorseCodesReverse[contextWordMorseCode] = [contextList[i]];
+      }
+    }
+
+    var finalOutput = "";
+    for (var i = 0; i < morseWords.length; i++) {
+      var matchedList = [];
+
+      if (morseWords[i] in contextListMorseCodesReverse) {
+        matchedList = contextListMorseCodesReverse[morseWords[i]];
+        if (matchedList.length > 1) {
+          var smallestMatch = matchedList[0];
+          var exclamationMark = "!";
+          for(var j = 1; j < matchedList.length; j++) {
+            if (smallestMatch.length > matchedList[j].length) {
+              smallestMatch = matchedList[j];
+            }
+          }
+          matchedList = [smallestMatch.concat(exclamationMark)];
+        }
+      } else {
+        var questionMark = "?";
+        var prefixMatchedMap = [];
+        var otherMatchedMap = [];
+
+        for (key in contextListMorseCodesReverse) {
+          var indexOne = morseWords[i].indexOf(key);
+          if (indexOne === 0) {
+            if (prefixMatchedMap.length == 0 || (prefixMatchedMap.length > 0 && key.length > prefixMatchedMap[0].length)) {
+              prefixMatchedMap[0] = key;
+              prefixMatchedMap[1] = contextListMorseCodesReverse[key];
+              prefixMatchedMap[2] = morseWords[i].length - key.length;
+            }
+          } else {
+            var indexTwo = key.indexOf(morseWords[i]);
+            if (indexTwo === 0) {
+              if (otherMatchedMap.length == 0 || (otherMatchedMap.length > 0 && key.length < otherMatchedMap[0].length)) {
+                otherMatchedMap[0] = key;
+                otherMatchedMap[1] = contextListMorseCodesReverse[key];
+                otherMatchedMap[2] = key.length - morseWords[i].length;
+              }
+            }
+          }
+        }
+
+        if (prefixMatchedMap.length > 0 && otherMatchedMap.length > 0) {
+          if (prefixMatchedMap[2] < otherMatchedMap[2]) {
+            matchedList = matchedList.concat(prefixMatchedMap[1]);
+          } else {
+            matchedList = matchedList.concat(otherMatchedMap[1]);
+          }
+          matchedList[0] = matchedList[0].concat(questionMark);
+        } else if (prefixMatchedMap.length > 0) {
+          matchedList = matchedList.concat(prefixMatchedMap[1]);
+          matchedList[0] = matchedList[0].concat(questionMark);
+        } else if (otherMatchedMap.length > 0) {
+          matchedList = matchedList.concat(otherMatchedMap[1]);
+          matchedList[0] = matchedList[0].concat(questionMark);
+        } else {
+          matchedList[0] = "No matching word found";
+        }
+      }
+
+      if (i === morseWords.length - 1) {
+        finalOutput += matchedList[0];
+      } else {
+        finalOutput += matchedList[0].concat("\n");
+      }
+      
+    }
+    console.log(finalOutput);
+}
+
+processData(input);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
